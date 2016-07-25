@@ -63,7 +63,8 @@ public final class JiraPlugin extends SonarPlugin {
   public List getExtensions() {
     return ImmutableList.of(
       // metrics part
-      JiraMetrics.class, JiraSensor.class, JiraWidget.class,
+      // TODO Not supported on the REST interface yet
+      //JiraMetrics.class, JiraSensor.class, JiraWidget.class,
 
       // issues part
       JiraIssueCreator.class, LinkFunction.class, JiraActionDefinition.class

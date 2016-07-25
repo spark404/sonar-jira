@@ -100,6 +100,18 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- rest client -->
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-rs-client</artifactId>
+      <version>3.1.5</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <version>2.0.2</version>
+    </dependency>
+
     <!-- unit tests -->
     <dependency>
       <groupId>org.codehaus.sonar</groupId>
@@ -145,6 +157,19 @@
           <execution>
             <goals>
               <goal>native2ascii</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-license-headers</id>
+            <phase>none</phase>
+            <goals>
+              <goal>check</goal>
             </goals>
           </execution>
         </executions>

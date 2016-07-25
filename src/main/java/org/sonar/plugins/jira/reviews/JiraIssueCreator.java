@@ -40,10 +40,13 @@ import org.sonar.api.rules.RuleFinder;
 import org.sonar.api.rules.RulePriority;
 import org.sonar.api.utils.SonarException;
 import org.sonar.plugins.jira.JiraConstants;
+import org.sonar.plugins.jira.rest.JiraIssue;
+import org.sonar.plugins.jira.rest.JiraRestInterface;
 import org.sonar.plugins.jira.soap.JiraSoapSession;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
@@ -146,10 +149,25 @@ public class JiraIssueCreator implements ServerExtension {
     return doCreateIssue(sonarIssue, soapSession, settings);
   }
 
+  public String createRestIssue(Issue sonarIssue, Settings settings) throws RemoteException {
+    String userName = settings.getString(JiraConstants.USERNAME_PROPERTY);
+    String password = settings.getString(JiraConstants.PASSWORD_PROPERTY);
+
+    try {
+      JiraRestInterface restInterface = new JiraRestInterface(getApiUrl(settings), userName, password);
+
+      final String priority = sonarSeverityToJiraPriorityId(RulePriority.valueOf(sonarIssue.severity()), settings);
+      final String description = generateIssueDescription(sonarIssue, settings);
+      final String summary = generateIssueSummary(sonarIssue);
+
+      return restInterface.createIssue(settings, summary, description, priority);
+    } catch (Exception e) {
+      throw new RemoteException("Issue create failed", e);
+    }
+  }
+
   protected JiraSoapSession createSoapSession(Settings settings) {
-    String jiraUrl = settings.getString(JiraConstants.SERVER_URL_PROPERTY);
-    String baseUrl = settings.getString(JiraConstants.SOAP_BASE_URL_PROPERTY);
-    String completeUrl = jiraUrl + baseUrl;
+    String completeUrl = getApiUrl(settings);
 
     // get handle to the JIRA SOAP Service from a client point of view
     JiraSoapSession soapSession = null;
@@ -160,6 +178,12 @@ public class JiraIssueCreator implements ServerExtension {
       throw new IllegalStateException("The JIRA server URL is not a valid one: " + completeUrl, e);
     }
     return soapSession;
+  }
+
+  private String getApiUrl(Settings settings) {
+    String jiraUrl = settings.getString(JiraConstants.SERVER_URL_PROPERTY);
+    String baseUrl = settings.getString(JiraConstants.SOAP_BASE_URL_PROPERTY);
+    return jiraUrl + baseUrl;
   }
 
   protected RemoteIssue doCreateIssue(Issue sonarIssue, JiraSoapSession soapSession, Settings settings) {

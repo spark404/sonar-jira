@@ -59,7 +59,7 @@ public class LinkFunctionTest {
     jiraIssueCreator = mock(JiraIssueCreator.class);
     remoteIssue = new RemoteIssue();
     remoteIssue.setKey("FOO-15");
-    when(jiraIssueCreator.createIssue(sonarIssue, settings)).thenReturn(remoteIssue);
+    when(jiraIssueCreator.createRestIssue(sonarIssue, settings)).thenReturn(remoteIssue.getKey());
 
     function = new LinkFunction(jiraIssueCreator);
   }
@@ -68,14 +68,14 @@ public class LinkFunctionTest {
   public void should_execute() throws Exception {
     function.createJiraIssue(context);
 
-    verify(jiraIssueCreator).createIssue(sonarIssue, settings);
+    verify(jiraIssueCreator).createRestIssue(sonarIssue, settings);
     verify(context).addComment(anyString());
     verify(context).setAttribute(JiraConstants.SONAR_ISSUE_DATA_PROPERTY_KEY, "FOO-15");
   }
 
   @Test
   public void should_fail_execute_if_remote_problem() throws Exception {
-    when(jiraIssueCreator.createIssue(sonarIssue, settings)).thenThrow(new RemoteException("Server Error"));
+    when(jiraIssueCreator.createRestIssue(sonarIssue, settings)).thenThrow(new RemoteException("Server Error"));
 
     thrown.expect(IllegalStateException.class);
     thrown.expectMessage("Impossible to create an issue on JIRA. A problem occured with the remote server: Server Error");
@@ -87,7 +87,7 @@ public class LinkFunctionTest {
   public void test_create_comment() throws Exception {
     settings.setProperty(JiraConstants.SERVER_URL_PROPERTY, "http://my.jira.server");
 
-    function.createComment(remoteIssue, context);
+    function.createComment(remoteIssue.getKey(), context);
 
     verify(context).addComment("Issue linked to JIRA issue: http://my.jira.server/browse/FOO-15");
   }
@@ -96,7 +96,7 @@ public class LinkFunctionTest {
   public void test_generate_comment_text() throws Exception {
     settings.setProperty(JiraConstants.SERVER_URL_PROPERTY, "http://my.jira.server");
 
-    String commentText = function.generateCommentText(remoteIssue, context);
+    String commentText = function.generateCommentText(remoteIssue.getKey(), context);
     assertThat(commentText).isEqualTo("Issue linked to JIRA issue: http://my.jira.server/browse/FOO-15");
   }
 

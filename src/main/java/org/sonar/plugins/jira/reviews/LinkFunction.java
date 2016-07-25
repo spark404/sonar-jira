@@ -19,7 +19,6 @@
  */
 package org.sonar.plugins.jira.reviews;
 
-import com.atlassian.jira.rpc.soap.client.RemoteIssue;
 import com.google.common.annotations.VisibleForTesting;
 import org.sonar.api.ServerExtension;
 import org.sonar.api.config.Settings;
@@ -42,16 +41,19 @@ public class LinkFunction implements Function, ServerExtension {
   }
 
   protected void createJiraIssue(Context context) {
-    RemoteIssue issue;
+    String issueKey;
     try {
-      issue = jiraIssueCreator.createIssue(context.issue(), context.projectSettings());
+      issueKey = jiraIssueCreator.createRestIssue(context.issue(), context.projectSettings());
+      // RemoteIssue issue = jiraIssueCreator.createIssue(context.issue(), context.projectSettings());
+      // issueKey = issue.getKey();
+
     } catch (RemoteException e) {
       throw new IllegalStateException("Impossible to create an issue on JIRA. A problem occured with the remote server: " + e.getMessage(), e);
     }
 
-    createComment(issue, context);
+    createComment(issueKey, context);
     // and add the property
-    context.setAttribute(JiraConstants.SONAR_ISSUE_DATA_PROPERTY_KEY, issue.getKey());
+    context.setAttribute(JiraConstants.SONAR_ISSUE_DATA_PROPERTY_KEY, issueKey);
   }
 
   @VisibleForTesting
@@ -76,16 +78,16 @@ public class LinkFunction implements Function, ServerExtension {
     }
   }
 
-  protected void createComment(RemoteIssue issue, Context context) {
-    context.addComment(generateCommentText(issue, context));
+  protected void createComment(String issueKey, Context context) {
+    context.addComment(generateCommentText(issueKey, context));
   }
 
-  protected String generateCommentText(RemoteIssue issue, Context context) {
+  protected String generateCommentText(String remoteKey, Context context) {
     StringBuilder message = new StringBuilder();
     message.append("Issue linked to JIRA issue: ");
     message.append(context.projectSettings().getString(JiraConstants.SERVER_URL_PROPERTY));
     message.append("/browse/");
-    message.append(issue.getKey());
+    message.append(remoteKey);
     return message.toString();
   }
 

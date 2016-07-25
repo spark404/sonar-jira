@@ -12,3 +12,6 @@ target/
 .project
 .settings
 
+# local override, should not be in the git repo
+src/test/resources/test-local.properties
+

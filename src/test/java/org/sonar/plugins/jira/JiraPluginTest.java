@@ -27,6 +27,6 @@ import static org.fest.assertions.Assertions.assertThat;
 public class JiraPluginTest {
   @Test
   public void testGetExtensions() throws Exception {
-    assertThat(new JiraPlugin().getExtensions().size()).isEqualTo(6);
+    assertThat(new JiraPlugin().getExtensions().size()).isEqualTo(3);
   }
 }
