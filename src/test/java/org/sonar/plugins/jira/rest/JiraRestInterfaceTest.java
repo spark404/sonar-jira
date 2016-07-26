@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.*;
 
+@Ignore("Only useful with a real jira at the moment")
 public class JiraRestInterfaceTest {
 
     private JiraRestInterface restInterface;
